@@ -3,35 +3,84 @@ import { useState, useEffect } from "react";
 
 const ToDoList = () => {
 	const [data, setdata] = useState([
-		{ text: "task 1", isEdit: false },
-		{ text: "task 2", isEdit: false },
-		{ text: "task 3", isEdit: false },
+		{ label: "Make the bed", done: false },
+		{ label: "Walk the dog", done: false },
+		{ label: "Do the replits", done: false },
 	]);
 
-	// const inputRef = useRef(null);
-
-	const [newTask, setNewTask] = useState("");
-
+	const [newTask, setNewTask] = useState([
+		{ label: "Make the bed", done: false },
+		{ label: "Walk the dog", done: false },
+		{ label: "Do the replits", done: false },
+	]);
+	const apiURL = "https://assets.breatheco.de/apis/fake/todos/user/jonsowers";
 	const [isShown, setIsShown] = useState({
 		state: false,
 		index: 0,
 	});
 
+	useEffect(() => {
+		getInfo();
+		newEntry();
+	}, []);
+
+	const getInfo = () => {
+		fetch("https://assets.breatheco.de/apis/fake/todos/user/jonsowers")
+			.then((response) => response.json())
+			.then((json) => {
+				setdata(json);
+				console.log(json);
+			});
+	};
+
 	const add = () => {
 		console.log("clicked");
-		let newArray = [...data];
-		newArray.push({ text: newTask, isEdit: false });
+		let newArray = [...data, { label: newTask, done: false }];
 
 		console.log(newArray);
 		setdata(newArray);
 	};
 
-	const deleteItem = (index) => {
-		console.log(index);
-		let newArr = [...data];
-		newArr.splice(index, 1);
+	const newEntry = () => {
+		fetch("https://assets.breatheco.de/apis/fake/todos/user/jonsowers", {
+			method: "PUT",
+			body: JSON.stringify([...data]),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((response) => response.json())
+			.then((response) => JSON.stringify(response));
+		// .then((newTask) => setNewTask(newTask));
+	};
 
-		setdata(newArr);
+	const newToDo = () => {
+		fetch("https://assets.breatheco.de/apis/fake/todos/user/jonsowers", {
+			method: "POST",
+			body: JSON.stringify(data),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((response) => response.json())
+			.then((response) => JSON.stringify(response));
+		// .then((newTask) => setNewTask(newTask));
+	};
+
+	const deleteItem = (index) => {
+		fetch("https://jsonplaceholder.typicode.com/posts" + index, {
+			method: "DELETE",
+		})
+			.then((response) => response.json())
+			.then((json) => {
+				setdata(json);
+				console.log(json);
+			});
+		// console.log(index);
+		// let newArr = [...data];
+		// newArr.splice(index, 1);
+
+		// setdata(newArr);
 	};
 
 	const handleInput = (event) => {
@@ -76,7 +125,7 @@ const ToDoList = () => {
 								onMouseLeave={() =>
 									setIsShown({ state: false, index: 0 })
 								}>
-								{todo.text}{" "}
+								{todo.label}{" "}
 								{isShown.state === true &&
 								isShown.index === index ? (
 									<button
